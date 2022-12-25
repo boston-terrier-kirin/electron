@@ -1,4 +1,35 @@
-<head></head>
-<body>
-  <h1>Video Info</h1>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Video Info</h1>
+    <form>
+      <div>
+        <label>Select a video</label>
+        <input type="file" accept="video/*" />
+      </div>
+      <p></p>
+      <button>Get Info</button>
+    </form>
+
+    <script>
+      document.querySelector('form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const file = document.querySelector('input').files[0];
+
+        ipcRenderer.send('video:submit', {
+          path: file.path,
+        });
+      });
+
+      ipcRenderer.on('video:metadata', (options) => {
+        document.querySelector('p').innerText = options.duration;
+      });
+    </script>
+  </body>
+</html>
