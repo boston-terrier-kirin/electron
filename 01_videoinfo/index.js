@@ -12,8 +12,12 @@ app.whenReady().then(() => {
     width: 800,
     height: 800,
     webPreferences: {
+      // contextが共有されて、nodeが有効になっている場合のみ、html側で、requireが使えるようになる。
+      // contextIsolation: false / nodeIntegration: true の場合、html側で、requireが使える。
+      // contextIsolation: false / nodeIntegration: false の場合、html側で、requireが使えない。
+      // contextIsolation: true / nodeIntegration: true の場合、html側で、requireが使えない。
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: false,
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -28,6 +32,8 @@ app.whenReady().then(() => {
 
 ipcMain.on('video:submit', (event, options) => {
   ffmpeg.ffprobe(options.path, function (err, metadata) {
+    console.log('metadata.format.duration', metadata.format.duration);
+
     mainWindow.webContents.send('video:metadata', {
       duration: metadata.format.duration,
     });

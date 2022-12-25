@@ -28,6 +28,7 @@
       });
 
       ipcRenderer.on('video:metadata', (options) => {
+        console.log(options);
         document.querySelector('p').innerText = options.duration;
       });
     </script>
