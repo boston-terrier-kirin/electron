@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 const resizeImg = require('resize-img');
+const log = require('electron-log');
+
+process.env.NODE_ENV = 'production';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
@@ -10,6 +13,8 @@ const isMac = process.platform === 'darwin';
 let mainWindow;
 
 function createMainWidnow() {
+  log.info('createMainWidnow');
+
   mainWindow = new BrowserWindow({
     title: 'Image Resizer',
     width: isDev ? 1000 : 500,
@@ -44,7 +49,7 @@ app.whenReady().then(() => {
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
 
-  mainWindow.on('close', () => {
+  mainWindow.on('closed', () => {
     mainWindow = null;
   });
 
@@ -118,7 +123,7 @@ async function resizeImage({ imgPath, width, height, dest }) {
     mainWindow.webContents.send('image:done');
 
     shell.openPath(dest);
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    log.error(err);
   }
 }

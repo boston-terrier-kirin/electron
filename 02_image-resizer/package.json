@@ -5,13 +5,18 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "npx electronmon ."
+    "start": "npx electronmon .",
+    "package-win": "electron-packager . --overwrite --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=false --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ImageShrink\""
   },
   "author": "Kohei Matsumoto",
   "license": "MIT",
   "dependencies": {
     "electron": "^22.0.0",
+    "electron-log": "^4.4.8",
     "resize-img": "^2.0.0",
     "toastify-js": "^1.12.0"
+  },
+  "devDependencies": {
+    "electron-packager": "^17.1.1"
   }
 }
