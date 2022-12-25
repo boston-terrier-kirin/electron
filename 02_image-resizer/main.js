@@ -5,7 +5,7 @@ const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 const resizeImg = require('resize-img');
 const log = require('electron-log');
 
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'development';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
@@ -21,7 +21,7 @@ function createMainWidnow() {
     height: 800,
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: true, // trueにしないと、preload.js経由でosモジュールを公開できなくなってしまう模様。
       preload: path.join(__dirname, 'preload.js'),
     },
   });
