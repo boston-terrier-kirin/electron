@@ -3,18 +3,20 @@ import React, { useState } from 'react';
 const AddLogItem = ({ addItem }) => {
   const [text, setText] = useState('');
   const [user, setUser] = useState('');
-  const [priority, setPriority] = useState('');
+  const [priority, setPriority] = useState('low');
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
     addItem({
-      _id: Math.floor(Math.random() * 1000),
       text,
       user,
       priority,
-      created: new Date().toString(),
     });
+
+    setText('');
+    setUser('');
+    setPriority('');
   };
 
   return (

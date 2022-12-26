@@ -1,5 +1,11 @@
 import path from 'path';
 import { BrowserWindow, Menu, app, ipcMain } from 'electron';
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
+const connectDB = require('./config/db');
+const Log = require('./models/log');
+
+connectDB();
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
@@ -26,7 +32,7 @@ function createMainWidnow() {
 app.whenReady().then(() => {
   createMainWidnow();
 
-  const mainMenu = Menu.buildFromTemplate([]);
+  const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
 
   mainWindow.on('closed', () => {
@@ -40,12 +46,81 @@ app.whenReady().then(() => {
   });
 });
 
+const menu = [
+  ...(isMac ? [{ role: 'appMenu' }] : []),
+  {
+    role: 'fileMenu',
+  },
+  {
+    role: 'editMenu',
+  },
+  {
+    label: 'Logs',
+    submenu: [
+      {
+        label: 'Clear Logs',
+        click: () => clearLogs(),
+      },
+    ],
+  },
+  ...(isDev
+    ? [
+        {
+          label: 'Developer',
+          submenu: [
+            { role: 'reload' },
+            { role: 'forcereload' },
+            { type: 'separator' },
+            { role: 'toggledevtools' },
+          ],
+        },
+      ]
+    : []),
+];
+
 app.on('window-all-closed', () => {
   if (!isMac) {
     app.quit();
   }
 });
 
-ipcMain.on('ping', (event, options) => {
-  console.log(options);
+ipcMain.on('logs:load', sendLogs);
+
+ipcMain.on('logs:add', async (event, item) => {
+  try {
+    await Log.create(item);
+    await sendLogs();
+  } catch (err) {
+    console.log(err);
+  }
 });
+
+ipcMain.on('logs:remove', async (event, id) => {
+  try {
+    await Log.findByIdAndDelete({ _id: id });
+    await sendLogs();
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+async function sendLogs() {
+  try {
+    const logs = await Log.find().sort({ created: -1 });
+
+    mainWindow.webContents.send('logs:get', {
+      logs: JSON.stringify(logs),
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function clearLogs() {
+  try {
+    await Log.deleteMany({});
+    mainWindow.webContents.send('logs:clear');
+  } catch (err) {
+    console.log(err);
+  }
+}

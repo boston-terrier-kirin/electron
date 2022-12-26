@@ -1,38 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AddLogItem from './components/AddLogItem';
 import Alert from './components/Alert';
 import LogItem from './components/LogItem';
 
 export const App = () => {
-  const [logs, setLogs] = useState([
-    {
-      _id: 1,
-      text: 'This is log one',
-      priority: 'low',
-      user: 'Brad',
-      created: new Date().toString(),
-    },
-    {
-      _id: 2,
-      text: 'This is log two',
-      priority: 'moderate',
-      user: 'Kate',
-      created: new Date().toString(),
-    },
-    {
-      _id: 3,
-      text: 'This is log three',
-      priority: 'high',
-      user: 'John',
-      created: new Date().toString(),
-    },
-  ]);
-
+  const [logs, setLogs] = useState([]);
   const [alert, setAlert] = useState({
     show: false,
     message: '',
     variant: 'success',
   });
+
+  useEffect(() => {
+    ipcRenderer.send('logs:load');
+
+    ipcRenderer.on('logs:get', (contents) => {
+      setLogs(JSON.parse(contents.logs));
+    });
+
+    ipcRenderer.on('logs:clear', () => {
+      setLogs([]);
+      showAlert('Logs Cleared');
+    });
+  }, []);
 
   const addItem = (item) => {
     if (item.text === '' || item.user === '' || item.priority === '') {
@@ -40,14 +30,13 @@ export const App = () => {
       return;
     }
 
-    setLogs((prev) => [item, ...prev]);
-    showAlert('Log added');
+    ipcRenderer.send('logs:add', item);
+    showAlert('Log Added');
   };
 
   const removeItem = (item) => {
-    const newLogs = logs.filter((log) => log._id !== item._id);
-    setLogs(newLogs);
-    showAlert('Log removed');
+    ipcRenderer.send('logs:remove', item._id);
+    showAlert('Log Removed');
   };
 
   const showAlert = (message, variant = 'success', seconds = 3000) => {
