@@ -1,0 +1,3 @@
+https://github.com/sprout2000/electron-starter#readme
+
+https://zenn.dev/sprout2000/articles/5d7b350c2e85bc
