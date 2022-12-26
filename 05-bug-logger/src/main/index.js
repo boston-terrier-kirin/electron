@@ -2,6 +2,10 @@ import path from 'path';
 import { BrowserWindow, Menu, app, ipcMain } from 'electron';
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
+
 const connectDB = require('./config/db');
 const Log = require('./models/log');
 
